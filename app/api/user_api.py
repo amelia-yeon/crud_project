@@ -8,6 +8,7 @@ from app.models import *
 
 user = APIRouter()
 
+# 회원가입 API
 @user.post("/sign-up", response_model=schemas.UsersRES, status_code=201)
 async def register(data: schemas.UsersREQ, session: Session = Depends(db.session)):
     u = models.Users(email=data.email, pw=data.pw, name=data.name)
