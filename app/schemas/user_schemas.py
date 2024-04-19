@@ -14,3 +14,8 @@ class UsersREQ(BaseModel):
     email: EmailStr
     pw: str
     name : str
+
+
+class UserLogin(BaseModel):
+    email : EmailStr
+    pw : str

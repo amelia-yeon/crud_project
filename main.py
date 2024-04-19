@@ -2,13 +2,21 @@ from fastapi import FastAPI
 import uvicorn
 
 from config import get_env
+from app.api.user_api import user
+from app.middleware.init_logger import *
+from app.middleware.access_control import AccessControl
+
 
 
 def start_app():
+    
     app = FastAPI(debug=True)
-    env = get_env
+    env = get_env()
     
+    app.add_middleware(InitLogger)
+    app.add_middleware(AccessControl)
     
+    app.include_router(user, prefix="/users", tags=["Users"])
     
     return app
 
