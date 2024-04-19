@@ -13,9 +13,4 @@ class UsersRES(BaseModel):
 class UsersREQ(BaseModel):
     email: EmailStr
     pw: str
-
-
-class UsersREQ(BaseModel):
-    email: EmailStr
-    pw: str
     name : str

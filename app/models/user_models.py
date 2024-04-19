@@ -40,6 +40,10 @@ class Users(Base):
     @classmethod
     def get_by_email(cls, session: Session, email: str):
         return session.query(cls).filter_by(email=email).first()
+    
+    @classmethod
+    def get_by_email_and_status(cls, session: Session, email: str, status: UserStatus):
+        return session.query(cls).filter_by(email=email, status=status).first()
 
     @classmethod
     def update(cls, session: Session, id: int, **kwargs):
