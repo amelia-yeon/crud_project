@@ -10,7 +10,7 @@ user = APIRouter()
 
 # 회원가입 API
 @user.post("/sign-up", response_model=schemas.UsersRES, status_code=201)
-async def register(data: schemas.UsersREQ, session: Session = Depends(db.session)):
+async def signup(data: schemas.UsersREQ, session: Session = Depends(db.session)):
     u = models.Users(email=data.email, pw=data.pw, name=data.name)
     if models.Users.get_by_email_and_status(session,data.email, models.UserStatus.ACTIVE):
         raise BadRequestException("이미 존재하는 이메일입니다.")

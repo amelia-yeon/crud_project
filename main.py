@@ -3,9 +3,10 @@ import uvicorn
 
 from config import get_env
 from app.api.user_api import user
-from app.middleware.init_logger import *
+from app.middleware.init_logger import InitLogger
 from app.middleware.access_control import AccessControl
 
+from app.db.connection import db
 
 
 def start_app():

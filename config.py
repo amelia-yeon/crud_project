@@ -32,20 +32,17 @@ class DevSettings(Settings):
     DB_URL = f"mysql+pymysql://{os.getenv('DB_INFO')}/viva?charset=utf8mb4"
     DB_POOL_SIZE = 5
     DB_MAX_OVERFLOW = 10
-    TYPE = "dev"
 
 class TestSettings(Settings):
     TEST_MODE = True
     DB_URL = "mysql+pymysql://root:sychung@localhost:3306/viva?charset=utf8mb4"
     DB_POOL_SIZE = 1
     DB_MAX_OVERFLOW = 0
-    TYPE = "Test"
 
 class ProdSettings(Settings):
     DB_URL = "mysql+pymysql://root:sychung@localhost:3306/viva?charset=utf8mb4"
     DB_POOL_SIZE = 5
     DB_MAX_OVERFLOW = 10
-    TYPE = "prd"
 
 def get_env():
     cfg_cls = dict(

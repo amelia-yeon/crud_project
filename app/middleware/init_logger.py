@@ -20,13 +20,13 @@ class InitLogger(BaseHTTPMiddleware):
         def set_datetime(record):
             record["extra"]["datetime"] = pendulum.now('Asia/Seoul')
         
-        if get_env().TYPE == 'dev':
+        if get_env()  == 'dev':
             logger.configure(
             patcher=set_datetime,
             handlers=setting.DevelopConfig.LOGURU_SETTINGS['handler'],
             levels=setting.DevelopConfig.LOGURU_SETTINGS['levels']
         )
-        elif get_env().TYPE == 'prd':
+        elif get_env() == 'prd':
             logger.configure(
                 patcher=set_datetime,
                 handlers=setting.ProductionConfig.LOGURU_SETTINGS['handler'],
