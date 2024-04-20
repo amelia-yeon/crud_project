@@ -8,13 +8,14 @@ import string
 from datetime import datetime
 from config import get_env
 
+from app.utils.utils import *
 from app.exception.exceptions import *
 
 def create_token(data: dict, delta: int):
     conf = get_env()
-    expire = datetime.utcnow() + timedelta(minutes=delta)
+    expire = get_current_utc_time() + timedelta(minutes=delta)
     payload = dict(exp=expire, **data)
-    payload["iat"] = datetime.utcnow()
+    payload["iat"] = get_current_utc_time()
     payload["iss"] = "test api"
     encoded_jwt = jwt.encode(payload, conf.JWT_SECRET_KEY, algorithm=conf.JWT_ALGORITHM)
     return encoded_jwt

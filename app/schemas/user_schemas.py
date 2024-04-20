@@ -9,7 +9,6 @@ class UsersRES(BaseModel):
     class Config:
         orm_mode = True
 
-
 class UsersREQ(BaseModel):
     email: EmailStr
     pw: str
@@ -19,3 +18,15 @@ class UsersREQ(BaseModel):
 class UserLogin(BaseModel):
     email : EmailStr
     pw : str
+    
+class Token(BaseModel):
+    access_token: str
+    refresh_token: str = None
+    
+class RefreshToken(BaseModel):
+    refresh_token: str
+
+class UpdateUser(BaseModel):
+    curr_pw: str
+    new_pw : str | None
+    new_name : str | None 
