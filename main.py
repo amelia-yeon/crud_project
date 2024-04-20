@@ -13,6 +13,7 @@ def start_app():
     
     app = FastAPI(debug=True)
     env = get_env()
+    db.init_db(app=app, **env.dict())
     
     app.add_middleware(InitLogger)
     app.add_middleware(AccessControl)
