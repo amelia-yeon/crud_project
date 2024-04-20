@@ -3,6 +3,7 @@ import uvicorn
 
 from config import get_env
 from app.api.user_api import user
+from app.api.post_api import router
 from app.middleware.init_logger import InitLogger
 from app.middleware.access_control import AccessControl
 
@@ -19,6 +20,7 @@ def start_app():
     app.add_middleware(AccessControl)
     
     app.include_router(user, prefix="/users", tags=["Users"])
+    app.include_router(router, prefix="/board", tags=["board"])
     
     return app
 
