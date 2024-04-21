@@ -1,5 +1,6 @@
 from fastapi import FastAPI
 import uvicorn
+from fastapi_pagination import add_pagination
 
 from config import get_env
 from app.api.user_api import user
@@ -21,6 +22,8 @@ def start_app():
     
     app.include_router(user, prefix="/users", tags=["Users"])
     app.include_router(router, prefix="/board", tags=["board"])
+    
+    add_pagination(router)
     
     return app
 

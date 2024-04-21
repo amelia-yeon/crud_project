@@ -67,3 +67,37 @@ def delete_content(data: schemas.DeletContentReq,user,session:Session):
         logger.error(f"Deletion error for post ID {data.post_id}: {e}")
         session.rollback()
         raise InternalServerException("삭제 중 에러가 발생했습니다.")
+    
+def get_posts_username(session:Session):
+    query = session.query(
+        models.Posts.title,
+        models.Users.name,
+        models.Posts.view_cnt,
+        models.Posts.del_y
+    ).join(models.Users, models.Posts.user_id == models.Users.id
+    ).order_by(models.Posts.view_cnt.desc(), models.Posts.created_at.desc())
+    result = query.all()
+    return result
+
+def get_post(posts):
+    data = []
+    for post in posts:
+        pre_data =  schemas.GetBoardsRes(
+        title = post.title,
+        name = "deleted user" if post.del_y else post.name,
+        view_cnt = post.view_cnt
+        )
+        data.append(pre_data)
+    return data
+
+def get_content(post):
+    
+    data = schemas.GetContentsRes(
+        name = post.user_name,
+        content = post.content,
+        title = post.title,
+        created_at = post.created_at,
+        updated_at = "" if post.edit_cnt == 0 else post.updated_at
+        )
+    
+    return data

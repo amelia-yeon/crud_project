@@ -1,4 +1,5 @@
 from fastapi import APIRouter, Depends
+from fastapi_pagination import Page, paginate, add_pagination, LimitOffsetPage
 from sqlalchemy.orm import Session
 from starlette.requests import Request
 from typing import List
@@ -41,3 +42,19 @@ async def delete_post(
     user = session.query(models.Users).get(request.state.user.id)
     return crud.delete_content(data,user,session)    
 
+# 게시글 목록 조회
+@router.get("/get/post", response_model=Page[schemas.GetBoardsRes]) 
+async def get_post_all(session: Session = Depends(db.session)):
+    posts = crud.get_posts_username(session)
+    data = crud.get_post(posts)
+    return paginate(data)
+
+# 게시물 조회 
+@router.get("/posts/{post_id}")
+def read_post(post_id: int, session: Session = Depends(db.session)):
+    post = session.query(models.Posts).filter(models.Posts.id == post_id).first()
+    if post is None:
+        raise BadRequestException("게시물이 없습니다.")
+    post.view_cnt += 1  # 조회수 증가
+    session.commit()  # 변경 사항 저장
+    return crud.get_content(post)
