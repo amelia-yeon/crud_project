@@ -41,3 +41,24 @@ def update_info(data:schemas.UpdateUser,user,session:Session, response:Response 
         return {"value" : "Change Success"}
     else:
         return {"message": "No changes made"}
+    
+
+def status_delete(user, session:Session):
+    if not user:
+        raise BadRequestException("유저가 없습니다")
+    if user.refresh_token is None and user.status == models.UserStatus.DELETED:
+        raise BadRequestException("이미 delete로 변환된 유저입니다.")
+    
+    user.status = models.UserStatus.DELETED
+    
+    if user.status == models.UserStatus.DELETED:
+        user.refresh_token = None
+        user.refresh_token_expiration = None
+        
+    posts = session.query(models.Posts).filter(models.Posts.user_id == user.id).all()
+    for post in posts:
+        post.del_y = True
+    
+    session.commit()
+        
+    return {"message": "delete success"}

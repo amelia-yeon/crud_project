@@ -6,7 +6,7 @@ from app.db.connection import db
 from app.exception.exceptions import *
 from app.utils.auth_utils import *
 from app.models import *
-from app.controller.user_crud import *
+from app.controller import user_crud as crud_ctrl
 from starlette.requests import Request
 
 
@@ -32,7 +32,7 @@ async def login(data: schemas.UserLogin,session: Session = Depends(db.session),r
         raise UnauthorizedException("존재하지 않는 이메일입니다.")
     if not is_valid_password(data.pw, u.pw):
         raise UnauthorizedException("비밀번호가 일치하지 않습니다.")
-    return login_user(u,session,response)
+    return crud_ctrl.login_user(u,session,response)
 
 # Refresh Token 발행 API
 @user.post("/refresh-token")
@@ -41,7 +41,7 @@ async def refresh_token(data: schemas.RefreshToken, session: Session = Depends(d
     u = session.query(models.Users).filter_by(id=refresh_payload["id"]).first()
     token = u.token_refresh(session, data.refresh_token)
     
-    return token_issued(token,response)
+    return crud_ctrl.token_issued(token,response)
 
 # 유저 정보 수정 update API
 @user.post("/update/info")
@@ -52,7 +52,15 @@ async def update_user(
     response:Response = None):
     user = session.query(models.Users).get(request.state.user.id)
     
-    return update_info(data,user,session,response)
+    return crud_ctrl.update_info(data,user,session,response)
 
+# 회원 탈퇴 API
+@user.post("/status/delete")
+async def delete_user(
+    request: Request, 
+    session: Session = Depends(db.session),_=Depends(HTTP_BEARER)):
+    user = session.query(models.Users).get(request.state.user.id)
+    
+    return crud_ctrl.status_delete(user, session)
 
 
