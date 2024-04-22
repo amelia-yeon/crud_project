@@ -6,7 +6,11 @@
     - 명령어 `pip list` 로 설치했는지 확인 가능
     - 라이브러리 설치 명령어 - `pip install virtualenv`
 - 가상 환경 생성   
-    - 가상 환경 생성 명령어 - `virtualenv .venv`
+    - 가상 환경 생성 명령어 - `virtualenv .venv --python=3.10`
+- 실행 방법
+    - main.py와 동일 선상 - `python main.py`
+- swagger 주소
+    - 127.0.0.1:8000/docs 
 
-## Project status
-**[2024-04-18]** 
+
+**start:2024-04-18** 
