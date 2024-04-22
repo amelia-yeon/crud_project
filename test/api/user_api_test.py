@@ -3,10 +3,13 @@
 import pytest
 import bcrypt
 from fastapi import FastAPI, Response, Depends, Request
+from unittest.mock import MagicMock
 from app.utils.auth_utils import *
 from app.models import Users, UserStatus
 from app.schemas import UsersREQ, UsersRES
 from app.exception.exceptions import *
+from app.schemas.user_schemas import *
+
 
 @pytest.fixture
 def user_login_data():
@@ -19,7 +22,6 @@ def mock_user():
     return user
 
 def test_signup_new_user(client, mocker, mock_user,mock_db_session):
-    # 요청 데이터 준비
     user_data={
         "email": "user@example.com",
         "pw": "Str!@#123",
@@ -28,10 +30,8 @@ def test_signup_new_user(client, mocker, mock_user,mock_db_session):
     mock_user = mock_user
     mock_user.id = 1 
     
-    # 모의: 이메일 중복 검사가 None을 반환
     mocker.patch('app.models.Users.get_by_email_and_status', return_value=None)
     
-    # 모의: DB 세션의 add와 commit 메서드
     mock_db_session.add = mocker.MagicMock()
     mock_db_session.commit = mocker.MagicMock()
 
@@ -46,7 +46,6 @@ def test_signup_new_user(client, mocker, mock_user,mock_db_session):
         
   
 def test_signup_existing_user(client, mock_user,mocker):
-    # 이미 존재하는 사용자 객체
     existing_user = mock_user
     mocker.patch('app.models.user_models.Users.get_by_email_and_status', return_value=existing_user)
     user_data = {'email': 'user@example.com', 'pw': 'Str!@#123', 'name': 'Existing'}
@@ -57,13 +56,9 @@ def test_signup_existing_user(client, mock_user,mocker):
 
 
 def test_login_success(client, mocker, mock_user, user_login_data):
-    # Users 클래스의 get_by_email_and_status 메서드를 모의하여 항상 mock_user를 반환
     mocker.patch('app.models.user_models.Users.get_by_email_and_status', return_value=mock_user)
-
-    # 비밀번호 검증 함수를 모의하여 항상 True를 반환
     mocker.patch('app.utils.auth_utils.is_valid_password', return_value=True)
 
-    # Users 클래스의 get_token 메서드를 모의하여 토큰 정보를 반환
     mocker.patch('app.models.user_models.Users.get_token', return_value={
         "access_token": "1234",
         "refresh_token": "abcde"
@@ -74,7 +69,6 @@ def test_login_success(client, mocker, mock_user, user_login_data):
         response = client.post("users/login", json=user_login_data)
         assert response.status_code == 200
         assert response.json() == {"message": "Login Success"}
-        # 응답 헤더에서 토큰 검증
         assert response.headers['Access-Token'] == "1234"
         assert response.headers['Refresh-Token'] == "abcde"
         
@@ -97,4 +91,47 @@ def test_login_invalid_password(client, user_login_data, mocker):
 
     assert response.status_code == 404
     assert NotFoundException("비밀번호가 일치하지 않습니다.")
+
+
+
+def test_refresh_token_success(client, mocker, mock_db_session):
+    test_refresh_token = "abcde"
+    test_user_id = 1  
+
+    mock_user = MagicMock()
+    mock_user.id = test_user_id
+    mock_user.token_refresh = mocker.MagicMock(return_value={
+        "access_token": "1234567",
+        "refresh_token": "tndus2623"
+    })
+
+    mocker.patch('app.utils.auth_utils.decode_token', return_value={"id": test_user_id})
+    
+    mock_query = mocker.MagicMock()
+    mock_filter = mocker.MagicMock(return_value=mock_query)
+    mock_query.filter_by = mocker.MagicMock(return_value=mock_filter)
+    mock_filter.first = mocker.MagicMock(return_value=mock_user)
+    mock_db_session.query = mocker.MagicMock(return_value=mock_query)
+
+    try:
+        response = client.post("users/refresh-token", json={"refresh_token": test_refresh_token})
+
+        assert response.status_code == 200
+        assert response.json() == {"message": "access & refresh 모두 발급 완료"}
+        assert response.headers['Access-Token'] == "1234567"
+        assert response.headers['Refresh-Token'] == "tndus2623"
+    
+    except Exception as e:
+        print(f"Error during API call: {e}")
+        
+def test_refresh_token_invalid(client, mocker):
+    mocker.patch('app.utils.auth_utils.decode_token', side_effect=Exception("토큰이 만료되었습니다."))
+    try:
+        response = client.post("users/refresh-token", json={"refresh_token": "expired_tndus2623"})
+
+        assert response.status_code == 400  # 토큰 만료로 인한 오류 처리
+        assert "토큰이 만료되었습니다." in response.json()['detail']
+    
+    except Exception as e:
+        print(f"Error during API call: {e}")
 
