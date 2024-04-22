@@ -34,8 +34,8 @@ class DevSettings(Settings):
     DB_MAX_OVERFLOW = 10
 
 class TestSettings(Settings):
-    TEST_MODE = True
-    DB_URL = "mysql+pymysql://root:sychung@localhost:3306/viva?charset=utf8mb4"
+    # TEST_MODE = True
+    DB_URL = "mysql+pymysql://root:sychung@localhost:3306/test2?charset=utf8mb4"
     DB_POOL_SIZE = 1
     DB_MAX_OVERFLOW = 0
 

@@ -26,12 +26,11 @@ async def signup(data: schemas.UsersREQ, session: Session = Depends(db.session))
 # login API
 @user.post("/login")
 async def login(data: schemas.UserLogin,session: Session = Depends(db.session),response:Response = None):
-    u = models.Users.get_by_email(session, data.email)
     u = models.Users.get_by_email_and_status(session,data.email, models.UserStatus.ACTIVE)
     if not u:
-        raise UnauthorizedException("존재하지 않는 이메일입니다.")
+        raise NotFoundException("존재하지 않는 이메일입니다.")
     if not is_valid_password(data.pw, u.pw):
-        raise UnauthorizedException("비밀번호가 일치하지 않습니다.")
+        raise NotFoundException("비밀번호가 일치하지 않습니다.")
     return crud_ctrl.login_user(u,session,response)
 
 # Refresh Token 발행 API
