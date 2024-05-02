@@ -47,7 +47,7 @@ def update_content(data:schemas.UpdateContentReq,user,session:Session):
         
     except Exception as e:
         logger.error(e)
-        raise BaseException(status_code=500, detail="수정중 에러가 발생했습니다.")
+        raise InternalServerException("수정중 에러가 발생했습니다.")
 
 def delete_content(data: schemas.DeletContentReq,user,session:Session):
     post = models.Posts.get(session,data.post_id)
