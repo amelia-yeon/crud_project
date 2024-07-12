@@ -23,7 +23,7 @@ class Settings(BaseSettings):
 
     DB_URL: str = ""
     DB_POOL_RECYCLE: Optional[int] = 900
-    DB_ECHO: Optional[bool] = True
+    DB_ECHO: Optional[bool] = False
     DB_POOL_SIZE: Optional[int] = 1
     DB_MAX_OVERFLOW: Optional[int] = 1
 
@@ -34,7 +34,7 @@ class DevSettings(Settings):
     DB_MAX_OVERFLOW = 10
 
 class TestSettings(Settings):
-    TEST_MODE = True
+    TEST_MODE = False
     DB_URL = "mysql+pymysql://root:sychung@localhost:3306/test2?charset=utf8mb4"
     DB_POOL_SIZE = 1
     DB_MAX_OVERFLOW = 0
