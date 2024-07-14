@@ -35,13 +35,13 @@ class DBConnection:
         @app.on_event("startup")
         def startup():
             self._engine.connect()
-            print("DB 연결 성공")
+            # print("DB 연결 성공")
 
         @app.on_event("shutdown")
         def shutdown():
             self._session.close_all()
             self._engine.dispose()
-            print("DB 연결 해제")
+            # print("DB 연결 해제")
 
     def session(self):
         db_session = self._session()

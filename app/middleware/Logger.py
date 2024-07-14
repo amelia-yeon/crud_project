@@ -2,7 +2,6 @@ import time
 import logging
 import pendulum
 from fastapi import Request, HTTPException
-from fastapi.exceptions import RequestValidationError
 from starlette.middleware.base import BaseHTTPMiddleware
 from starlette.responses import JSONResponse, Response
 from starlette.types import ASGIApp, Scope, Receive, Send
@@ -18,10 +17,7 @@ class CustomFormatter(logging.Formatter):
 
     def formatTime(self, record, datefmt=None):
         dt = self.converter(record.created)
-        if datefmt:
-            s = dt.strftime(datefmt)
-        else:
-            s = dt.to_rfc3339_string()
+        s = dt.to_rfc3339_string()
         return s
 
     def format(self, record):
@@ -78,16 +74,30 @@ LOGGING_CONFIG = {
             "level": "INFO",
             "propagate": False,
         },
+        "uvicorn.asgi": {
+            "handlers": ["default"],
+            "level": "INFO",
+            "propagate": False,
+        },
+        "uvicorn.protocols": {
+            "handlers": ["default"],
+            "level": "INFO",
+            "propagate": False,
+        }
     },
 }
 
-def configure_logging():
-    logging.config.dictConfig(LOGGING_CONFIG)
-
+    
+    
 class InitLogger(BaseHTTPMiddleware):
     def __init__(self, app: ASGIApp):
         super().__init__(app)
-        configure_logging()
+        self.configure_logging()
+        self.logger =  logging.getLogger("API.Logging")
+        
+    @staticmethod
+    def configure_logging():
+        logging.config.dictConfig(LOGGING_CONFIG)
 
     async def dispatch(self, request: Request, call_next) -> Response:
         ip = request.client.host
@@ -98,15 +108,13 @@ class InitLogger(BaseHTTPMiddleware):
         try:
             response = await call_next(request)
         except HTTPException as e:
-            # logging.getLogger("exception_logger").error(f"{request.method} {request.url} >> {e.detail}")
             return JSONResponse({"message": e.detail}, status_code=e.status_code)
         except Exception as e:
-            # logging.getLogger("exception_logger").error(f"{request.method} {request.url} >> {e}")
             logging.getLogger("uvicorn.error").error(f"{request.method} {request.url} >> {e}")
             return JSONResponse({"message": "Internal Server Error"}, status_code=500)
 
         end_time = time.time()
-        logging.info(
+        self.logger.info(
             f"{request.client.host} | {request.method} | {request.url} | {response.status_code} | {end_time - start_time:.3f}s"
         )
 
